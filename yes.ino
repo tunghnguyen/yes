@@ -10,6 +10,12 @@ LoRaModem modem;  // Create an instance of LoRaModem
 // Nutrient sensor
 float TDS = 0.0;
 
+// Union to help convert float to byte array
+union FloatUnion {
+  float value;
+  byte bytes[4];
+};
+
 void setup() {
   // Initialize Serial Monitor for debugging
   Serial.begin(9600);
@@ -65,13 +71,14 @@ void loop() {
   TDS = getNutri();
 
   // Prepare the payload to send
-  String payload = "TDS:" + String(TDS, 2);\
+  FloatUnion payload;
+  payload.value = TDS;
 
   // Send data via LoRaWAN
   Serial.println("Sending data via LoRaWAN...");
   do {
     modem.beginPacket();            // Begin the packet transmission
-    modem.print(payload);           // Write the payload
+    modem.print(payload.bytes, 4);  // Write the payload
   } while (!modem.endPacket());     // Retry until succeed
 
   // Get routine's finish time
