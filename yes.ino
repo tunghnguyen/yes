@@ -1,5 +1,5 @@
-#include "nutri.h"
 #include "arduino_secrets.h"
+#include "nutri.h"
 
 #include <ArduinoLowPower.h>
 #include <MKRWAN.h>
@@ -8,13 +8,7 @@
 LoRaModem modem;  // Create an instance of LoRaModem
 
 // Nutrient sensor
-float TDS = 0.0;
-
-// Union to help convert float to byte array
-union FloatUnion {
-  float value;
-  byte bytes[4];
-};
+float payload = 0.0;
 
 void setup() {
   // Initialize Serial Monitor for debugging
@@ -47,7 +41,7 @@ void setup() {
   int joinAttempts = 0;
   const int maxJoinAttempts = 20;
   
-  while (!modem.joinOTAA(APP_EUI, APP_KEY)) {
+  while (!modem.joinOTAA(appEui, appKey)) {
     Serial.println("Join attempt failed. Retrying in 5 seconds...");
     delay(5000); // Wait 5 seconds before retrying
     joinAttempts++;
@@ -68,22 +62,17 @@ void loop() {
   startTime = millis();
 
   // Obtain nutrient readings
-  TDS = getNutri();
-
-  // Prepare the payload to send
-  FloatUnion payload;
-  payload.value = TDS;
+  payload = getNutri();
 
   // Send data via LoRaWAN
   Serial.println("Sending data via LoRaWAN...");
-  do {
-    modem.beginPacket();            // Begin the packet transmission
-    modem.print(payload.bytes, 4);  // Write the payload
-  } while (!modem.endPacket());     // Retry until succeed
+  modem.beginPacket();     // Begin the packet transmission
+  modem.print(payload);    // Write the payload
+  modem.endPacket();       // Retry until succeed
 
   // Get routine's finish time
   endTime = millis();
 
   // Delay to prevent flooding the network with data
-  LowPower.sleep(600000 - (endTime - startTime)) // Send data every 10 minutes
+  LowPower.sleep(600000 - (endTime - startTime)); // Send data every 10 minutes
 }

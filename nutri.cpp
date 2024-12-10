@@ -1,5 +1,7 @@
 #include "nutri.h"
 
+#include <MKRWAN.h>
+
 // Constants for the TDS sensor
 const int TDS_SENSOR_PIN = A0;
 const float voltageReference = 3.3;     // MKR WAN 1310 operates at 3.3V
