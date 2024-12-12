@@ -13,7 +13,11 @@ float payload = 0.0;
 void setup() {
   // Initialize Serial Monitor for debugging
   Serial.begin(9600);
+
+#if DEBUG == true
   while (!Serial); // Wait for Serial to be ready
+#endif
+
   Serial.println("Initializing LoRaWAN connection...");
 
   // Initialize the LoRaWAN modem
@@ -54,8 +58,8 @@ void setup() {
   Serial.println("Successfully joined the LoRaWAN network!");
 }
 
-unsigned long startTime;
-unsigned long endTime;
+unsigned long startTime = 0;
+unsigned long endTime = 0;
 
 void loop() {
   // Get routine's start time
